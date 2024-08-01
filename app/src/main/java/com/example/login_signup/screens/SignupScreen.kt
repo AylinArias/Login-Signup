@@ -1,41 +1,12 @@
 package com.example.login_signup.screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
@@ -49,27 +20,27 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.login_signup.composables.WaveHeader
 import com.example.login_signup.ui.theme.LoginSignupTheme
+import com.example.login_signup.viewmodels.SignupViewModel
+import org.koin.androidx.compose.getViewModel
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun SignupScreen(navController: NavController) {
     val scaffoldState = rememberScaffoldState()
-    val emailState = remember { mutableStateOf("") }
-    val phoneState = remember { mutableStateOf("") }
-    val passwordState = remember { mutableStateOf("") }
-    val confirmPasswordState = remember { mutableStateOf("") }
-    val passwordVisible = remember { mutableStateOf(false) }
-    val isError = remember { mutableStateOf(false) }
-    val errorMessage = remember { mutableStateOf("") }
-    val showSnackbar = remember { mutableStateOf(false) }
+    val signupViewModel: SignupViewModel = getViewModel()
+    val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(showSnackbar.value) {
-        if (showSnackbar.value) {
+    LaunchedEffect(Unit) {
+        if (signupViewModel.emailErrorState.value != null ||
+            signupViewModel.phoneErrorState.value != null ||
+            signupViewModel.passwordErrorState.value != null ||
+            signupViewModel.confirmPasswordErrorState.value != null
+        ) {
             scaffoldState.snackbarHostState.showSnackbar(
-                message = "Se presionó el botón de crear cuenta",
-                duration = SnackbarDuration.Long
+                message = "Por favor corrige los errores",
+                duration = SnackbarDuration.Short
             )
-            showSnackbar.value = false
         }
     }
 
@@ -118,40 +89,27 @@ fun SignupScreen(navController: NavController) {
                     )
 
                     TextField(
-                        value = emailState.value,
-                        onValueChange = { emailState.value = it },
+                        value = signupViewModel.emailState.value,
+                        onValueChange = { signupViewModel.emailState.value = it },
                         placeholder = { Text("Ingresar correo electrónico") },
-                        isError = isError.value,
+                        isError = signupViewModel.emailErrorState.value != null,
                         colors = TextFieldDefaults.textFieldColors(
                             backgroundColor = MaterialTheme.colors.surface,
                             focusedIndicatorColor = MaterialTheme.colors.primary,
                             unfocusedIndicatorColor = MaterialTheme.colors.onSurface
                         ),
                         leadingIcon = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Email,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Divider(
-                                    color = MaterialTheme.colors.primary,
-                                    modifier = Modifier
-                                        .height(24.dp)
-                                        .width(2.dp)
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.Email,
+                                contentDescription = null
+                            )
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth()
                     )
 
-                    if (isError.value) {
+                    if (signupViewModel.emailErrorState.value != null) {
                         Text(
-                            text = "Correo electrónico incorrecto",
+                            text = signupViewModel.emailErrorState.value!!,
                             color = MaterialTheme.colors.error,
                             fontSize = 12.sp
                         )
@@ -169,40 +127,27 @@ fun SignupScreen(navController: NavController) {
                     )
 
                     TextField(
-                        value = phoneState.value,
-                        onValueChange = { phoneState.value = it },
+                        value = signupViewModel.phoneState.value,
+                        onValueChange = { signupViewModel.phoneState.value = it },
                         placeholder = { Text("Ej: +54 12345678") },
-                        isError = isError.value,
+                        isError = signupViewModel.phoneErrorState.value != null,
                         colors = TextFieldDefaults.textFieldColors(
                             backgroundColor = MaterialTheme.colors.surface,
                             focusedIndicatorColor = MaterialTheme.colors.primary,
                             unfocusedIndicatorColor = MaterialTheme.colors.onSurface
                         ),
                         leadingIcon = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Phone,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Divider(
-                                    color = MaterialTheme.colors.primary,
-                                    modifier = Modifier
-                                        .height(24.dp)
-                                        .width(2.dp)
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.Phone,
+                                contentDescription = null
+                            )
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth()
                     )
 
-                    if (isError.value) {
+                    if (signupViewModel.phoneErrorState.value != null) {
                         Text(
-                            text = "Número de teléfono incorrecto",
+                            text = signupViewModel.phoneErrorState.value!!,
                             color = MaterialTheme.colors.error,
                             fontSize = 12.sp
                         )
@@ -220,51 +165,38 @@ fun SignupScreen(navController: NavController) {
                     )
 
                     TextField(
-                        value = passwordState.value,
-                        onValueChange = { passwordState.value = it },
+                        value = signupViewModel.passwordState.value,
+                        onValueChange = { signupViewModel.passwordState.value = it },
                         placeholder = { Text("Ej: abcABC#123") },
                         trailingIcon = {
                             IconButton(onClick = {
-                                passwordVisible.value = !passwordVisible.value
+                                signupViewModel.togglePasswordVisibility()
                             }) {
                                 Icon(
-                                    imageVector = if (passwordVisible.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                    imageVector = if (signupViewModel.passwordVisible.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                                     contentDescription = null
                                 )
                             }
                         },
-                        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-                        isError = isError.value,
+                        visualTransformation = if (signupViewModel.passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+                        isError = signupViewModel.passwordErrorState.value != null,
                         colors = TextFieldDefaults.textFieldColors(
                             backgroundColor = MaterialTheme.colors.surface,
                             focusedIndicatorColor = MaterialTheme.colors.primary,
                             unfocusedIndicatorColor = MaterialTheme.colors.onSurface
                         ),
                         leadingIcon = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Lock,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Divider(
-                                    color = MaterialTheme.colors.primary,
-                                    modifier = Modifier
-                                        .height(24.dp)
-                                        .width(2.dp)
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.Lock,
+                                contentDescription = null
+                            )
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth()
                     )
 
-                    if (isError.value) {
+                    if (signupViewModel.passwordErrorState.value != null) {
                         Text(
-                            text = "Contraseña incorrecta",
+                            text = signupViewModel.passwordErrorState.value!!,
                             color = MaterialTheme.colors.error,
                             fontSize = 12.sp
                         )
@@ -282,51 +214,38 @@ fun SignupScreen(navController: NavController) {
                     )
 
                     TextField(
-                        value = confirmPasswordState.value,
-                        onValueChange = { confirmPasswordState.value = it },
+                        value = signupViewModel.confirmPasswordState.value,
+                        onValueChange = { signupViewModel.confirmPasswordState.value = it },
                         placeholder = { Text("Reingresar contraseña") },
                         trailingIcon = {
                             IconButton(onClick = {
-                                passwordVisible.value = !passwordVisible.value
+                                signupViewModel.togglePasswordVisibility()
                             }) {
                                 Icon(
-                                    imageVector = if (passwordVisible.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                    imageVector = if (signupViewModel.passwordVisible.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                                     contentDescription = null
                                 )
                             }
                         },
-                        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-                        isError = isError.value,
+                        visualTransformation = if (signupViewModel.passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+                        isError = signupViewModel.confirmPasswordErrorState.value != null,
                         colors = TextFieldDefaults.textFieldColors(
                             backgroundColor = MaterialTheme.colors.surface,
                             focusedIndicatorColor = MaterialTheme.colors.primary,
                             unfocusedIndicatorColor = MaterialTheme.colors.onSurface
                         ),
                         leadingIcon = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Lock,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Divider(
-                                    color = MaterialTheme.colors.primary,
-                                    modifier = Modifier
-                                        .height(24.dp)
-                                        .width(2.dp)
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.Lock,
+                                contentDescription = null
+                            )
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth()
                     )
 
-                    if (isError.value) {
+                    if (signupViewModel.confirmPasswordErrorState.value != null) {
                         Text(
-                            text = "Contraseña incorrecta",
+                            text = signupViewModel.confirmPasswordErrorState.value!!,
                             color = MaterialTheme.colors.error,
                             fontSize = 12.sp
                         )
@@ -336,36 +255,14 @@ fun SignupScreen(navController: NavController) {
 
                     Button(
                         onClick = {
-                            val emailPattern = android.util.Patterns.EMAIL_ADDRESS
-                            val phonePattern = Regex("\\+\\d{1,3} \\d{6,15}")
-
-                            Log.d("SignupScreen", "Email: ${emailState.value}")
-                            Log.d("SignupScreen", "Phone: ${phoneState.value}")
-                            Log.d("SignupScreen", "Password: ${passwordState.value}")
-                            Log.d("SignupScreen", "Confirm Password: ${confirmPasswordState.value}")
-
-                            when {
-                                emailState.value.isEmpty() || !emailPattern.matcher(emailState.value).matches() -> {
-                                    isError.value = true
-                                    errorMessage.value = "Correo electrónico incorrecto"
+                            if (signupViewModel.validateFields()) {
+                                coroutineScope.launch {
+                                    scaffoldState.snackbarHostState.showSnackbar(
+                                        message = "Se presionó el botón de crear cuenta",
+                                        duration = SnackbarDuration.Long
+                                    )
                                 }
-                                phoneState.value.isEmpty() || !phonePattern.matches(phoneState.value) -> {
-                                    isError.value = true
-                                    errorMessage.value = "Número de teléfono incorrecto"
-                                }
-                                passwordState.value.isEmpty() -> {
-                                    isError.value = true
-                                    errorMessage.value = "Contraseña vacía"
-                                }
-                                passwordState.value != confirmPasswordState.value -> {
-                                    isError.value = true
-                                    errorMessage.value = "Las contraseñas no coinciden"
-                                }
-                                else -> {
-                                    isError.value = false
-                                    showSnackbar.value = true
-                                    navController.navigate("login")
-                                }
+                                navController.navigate("login")
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -373,43 +270,28 @@ fun SignupScreen(navController: NavController) {
                     ) {
                         Text(
                             text = "Crear cuenta",
-                            color = MaterialTheme.colors.onPrimary,
-                            fontFamily = FontFamily.Monospace
+                            color = MaterialTheme.colors.onPrimary
                         )
-                    }
-
-                    LaunchedEffect(isError.value) {
-                        if (isError.value) {
-                            scaffoldState.snackbarHostState.showSnackbar(
-                                message = errorMessage.value,
-                                duration = SnackbarDuration.Short
-                            )
-                        }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "¿Ya tienes una cuenta?",
-                            color = MaterialTheme.colors.onBackground,
-                            fontFamily = FontFamily.Monospace
+                            color = MaterialTheme.colors.onBackground
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        TextButton(
-                            onClick = {
-                                navController.navigate("login")
-                            }
-                        ) {
+                        TextButton(onClick = {
+                            navController.navigate("login")
+                        }) {
                             Text(
                                 text = "Ingresar",
-                                color = MaterialTheme.colors.primary,
-                                fontFamily = FontFamily.Monospace
+                                color = MaterialTheme.colors.primary
                             )
                         }
                     }
@@ -419,6 +301,8 @@ fun SignupScreen(navController: NavController) {
     )
 }
 
+
+/*
 @Preview(showBackground = true)
 @Composable
 fun SignupScreenPreview() {
@@ -426,4 +310,4 @@ fun SignupScreenPreview() {
         val navController = rememberNavController()
         SignupScreen(navController)
     }
-}
+}*/

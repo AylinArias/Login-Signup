@@ -1,106 +1,69 @@
 package com.example.login_signup.screens
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.SharedPreferences
-import android.util.Patterns
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
 import com.example.login_signup.composables.WaveHeader
 import com.example.login_signup.ui.theme.LoginSignupTheme
+import com.example.login_signup.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch
-
-
-
-fun provideEncryptedSharedPreferences(context: Context): SharedPreferences {
-    val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-    return EncryptedSharedPreferences.create(
-        "secret_shared_prefs",
-        masterKeyAlias,
-        context,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
-}
-
-
-fun storeRememberMePreference(context: Context, rememberMe: Boolean) {
-    val sharedPreferences = provideEncryptedSharedPreferences(context)
-    with(sharedPreferences.edit()) {
-        putBoolean("remember_me", rememberMe)
-        apply()
-    }
-}
-
-
-fun loadRememberMePreference(context: Context): Boolean {
-    val sharedPreferences = provideEncryptedSharedPreferences(context)
-    return sharedPreferences.getBoolean("remember_me", false)
-}
+import org.koin.androidx.compose.getViewModel
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun LoginScreen(navController: NavController) {
     val context = LocalContext.current
+    val loginViewModel: LoginViewModel = getViewModel()
+
     val scaffoldState = rememberScaffoldState()
-    val emailState = remember { mutableStateOf("") }
-    val passwordState = remember { mutableStateOf("") }
-    val passwordVisible = remember { mutableStateOf(false) }
-    val emailError = remember { mutableStateOf("") }
-    val passwordError = remember { mutableStateOf("") }
-    val rememberMeState = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        rememberMeState.value = loadRememberMePreference(context)
-    }
-
-    fun validateFields() {
-        emailError.value = if (emailState.value.isEmpty()) {
-            "Correo electrónico requerido"
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(emailState.value).matches()) {
-            "Correo electrónico inválido"
-        } else {
-            ""
-        }
-
-        passwordError.value = if (passwordState.value.isEmpty()) {
-            "Contraseña requerida"
-        } else if (passwordState.value.length < 8) {
-            "La contraseña debe tener al menos 8 caracteres"
-        } else {
-            ""
-        }
-    }
-
-    LaunchedEffect(emailError.value, passwordError.value) {
-        if (emailError.value.isNotEmpty() || passwordError.value.isNotEmpty()) {
-            scaffoldState.snackbarHostState.showSnackbar(
-                message = "Corrige los errores antes de continuar",
-                duration = SnackbarDuration.Long
-            )
-        }
+        loginViewModel.rememberMeState.value =
+            loginViewModel.preferencesManager.loadRememberMePreference()
     }
 
     Scaffold(
@@ -126,8 +89,7 @@ fun LoginScreen(navController: NavController) {
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .padding(bottom = 8.dp),
-                        color = MaterialTheme.colors.onBackground,
-                        fontFamily = FontFamily.Monospace
+                        color = MaterialTheme.colors.onBackground
                     )
 
                     Divider(
@@ -147,10 +109,10 @@ fun LoginScreen(navController: NavController) {
                     )
 
                     TextField(
-                        value = emailState.value,
-                        onValueChange = { emailState.value = it },
+                        value = loginViewModel.emailState.value,
+                        onValueChange = { loginViewModel.emailState.value = it },
                         placeholder = { Text("Ingresar correo electrónico") },
-                        isError = emailError.value.isNotEmpty(),
+                        isError = loginViewModel.emailError.value.isNotEmpty(),
                         colors = TextFieldDefaults.textFieldColors(
                             backgroundColor = MaterialTheme.colors.surface,
                             focusedIndicatorColor = MaterialTheme.colors.primary,
@@ -178,9 +140,9 @@ fun LoginScreen(navController: NavController) {
                             .fillMaxWidth()
                     )
 
-                    if (emailError.value.isNotEmpty()) {
+                    if (loginViewModel.emailError.value.isNotEmpty()) {
                         Text(
-                            text = emailError.value,
+                            text = loginViewModel.emailError.value,
                             color = MaterialTheme.colors.error,
                             fontSize = 12.sp
                         )
@@ -197,19 +159,22 @@ fun LoginScreen(navController: NavController) {
                     )
 
                     TextField(
-                        value = passwordState.value,
-                        onValueChange = { passwordState.value = it },
+                        value = loginViewModel.passwordState.value,
+                        onValueChange = { loginViewModel.passwordState.value = it },
                         placeholder = { Text("Ej: abcABC#123") },
                         trailingIcon = {
-                            IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
+                            IconButton(onClick = {
+                                loginViewModel.passwordVisible.value =
+                                    !loginViewModel.passwordVisible.value
+                            }) {
                                 Icon(
-                                    imageVector = if (passwordVisible.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                    imageVector = if (loginViewModel.passwordVisible.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                                     contentDescription = null
                                 )
                             }
                         },
-                        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-                        isError = passwordError.value.isNotEmpty(),
+                        visualTransformation = if (loginViewModel.passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+                        isError = loginViewModel.passwordError.value.isNotEmpty(),
                         colors = TextFieldDefaults.textFieldColors(
                             backgroundColor = MaterialTheme.colors.surface,
                             focusedIndicatorColor = MaterialTheme.colors.primary,
@@ -237,9 +202,9 @@ fun LoginScreen(navController: NavController) {
                             .fillMaxWidth()
                     )
 
-                    if (passwordError.value.isNotEmpty()) {
+                    if (loginViewModel.passwordError.value.isNotEmpty()) {
                         Text(
-                            text = passwordError.value,
+                            text = loginViewModel.passwordError.value,
                             color = MaterialTheme.colors.error,
                             fontSize = 12.sp
                         )
@@ -253,12 +218,10 @@ fun LoginScreen(navController: NavController) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Checkbox(
-                            checked = rememberMeState.value,
-                            onCheckedChange = { isChecked ->
-                                rememberMeState.value = isChecked
-                                storeRememberMePreference(context, isChecked)
-
-                                val message = if (isChecked) {
+                            checked = loginViewModel.rememberMeState.value,
+                            onCheckedChange = {
+                                loginViewModel.toggleRememberMe()
+                                val message = if (loginViewModel.rememberMeState.value) {
                                     "Recordarme activado"
                                 } else {
                                     "Recordarme desactivado"
@@ -300,8 +263,8 @@ fun LoginScreen(navController: NavController) {
 
                     Button(
                         onClick = {
-                            validateFields()
-                            if (emailError.value.isEmpty() && passwordError.value.isEmpty()) {
+                            loginViewModel.validateFields()
+                            if (loginViewModel.emailError.value.isEmpty() && loginViewModel.passwordError.value.isEmpty()) {
                                 coroutineScope.launch {
                                     scaffoldState.snackbarHostState.showSnackbar(
                                         message = "Ingreso exitoso",
@@ -351,6 +314,7 @@ fun LoginScreen(navController: NavController) {
     )
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
@@ -358,4 +322,4 @@ fun LoginScreenPreview() {
         val navController = rememberNavController()
         LoginScreen(navController)
     }
-}
+}*/

@@ -1,4 +1,4 @@
-package com.example.login_signup
+package com.example.login_signup.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background

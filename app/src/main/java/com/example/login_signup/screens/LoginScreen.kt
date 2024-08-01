@@ -1,6 +1,8 @@
-package com.example.login_signup
+package com.example.login_signup.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -22,13 +25,44 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.example.login_signup.composables.WaveHeader
 import com.example.login_signup.ui.theme.LoginSignupTheme
 import kotlinx.coroutines.launch
 
+
+
+fun provideEncryptedSharedPreferences(context: Context): SharedPreferences {
+    val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+    return EncryptedSharedPreferences.create(
+        "secret_shared_prefs",
+        masterKeyAlias,
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+}
+
+
+fun storeRememberMePreference(context: Context, rememberMe: Boolean) {
+    val sharedPreferences = provideEncryptedSharedPreferences(context)
+    with(sharedPreferences.edit()) {
+        putBoolean("remember_me", rememberMe)
+        apply()
+    }
+}
+
+
+fun loadRememberMePreference(context: Context): Boolean {
+    val sharedPreferences = provideEncryptedSharedPreferences(context)
+    return sharedPreferences.getBoolean("remember_me", false)
+}
+
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun LoginScreen(navController: NavController) {
+    val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
     val emailState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
@@ -38,11 +72,15 @@ fun LoginScreen(navController: NavController) {
     val rememberMeState = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(Unit) {
+        rememberMeState.value = loadRememberMePreference(context)
+    }
+
     fun validateFields() {
         emailError.value = if (emailState.value.isEmpty()) {
             "Correo electrónico requerido"
         } else if (!Patterns.EMAIL_ADDRESS.matcher(emailState.value).matches()) {
-            "Formato de correo electrónico inválido"
+            "Correo electrónico inválido"
         } else {
             ""
         }
@@ -60,7 +98,7 @@ fun LoginScreen(navController: NavController) {
         if (emailError.value.isNotEmpty() || passwordError.value.isNotEmpty()) {
             scaffoldState.snackbarHostState.showSnackbar(
                 message = "Corrige los errores antes de continuar",
-                duration = SnackbarDuration.Short
+                duration = SnackbarDuration.Long
             )
         }
     }
@@ -216,7 +254,22 @@ fun LoginScreen(navController: NavController) {
                     ) {
                         Checkbox(
                             checked = rememberMeState.value,
-                            onCheckedChange = { rememberMeState.value = it },
+                            onCheckedChange = { isChecked ->
+                                rememberMeState.value = isChecked
+                                storeRememberMePreference(context, isChecked)
+
+                                val message = if (isChecked) {
+                                    "Recordarme activado"
+                                } else {
+                                    "Recordarme desactivado"
+                                }
+                                coroutineScope.launch {
+                                    scaffoldState.snackbarHostState.showSnackbar(
+                                        message = message,
+                                        duration = SnackbarDuration.Long
+                                    )
+                                }
+                            },
                             colors = CheckboxDefaults.colors(MaterialTheme.colors.primary)
                         )
                         Text(
@@ -231,7 +284,7 @@ fun LoginScreen(navController: NavController) {
                                 coroutineScope.launch {
                                     scaffoldState.snackbarHostState.showSnackbar(
                                         message = "Recuperar contraseña aún no implementado",
-                                        duration = SnackbarDuration.Short
+                                        duration = SnackbarDuration.Long
                                     )
                                 }
                             }
@@ -249,6 +302,12 @@ fun LoginScreen(navController: NavController) {
                         onClick = {
                             validateFields()
                             if (emailError.value.isEmpty() && passwordError.value.isEmpty()) {
+                                coroutineScope.launch {
+                                    scaffoldState.snackbarHostState.showSnackbar(
+                                        message = "Ingreso exitoso",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                                 navController.navigate("home")
                             }
                         },

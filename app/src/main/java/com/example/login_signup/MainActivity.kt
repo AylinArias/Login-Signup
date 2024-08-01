@@ -10,6 +10,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.login_signup.screens.HomeScreen
+import com.example.login_signup.screens.LoginScreen
+import com.example.login_signup.screens.SignupScreen
 import com.example.login_signup.ui.theme.LoginSignupTheme
 
 class MainActivity : ComponentActivity() {

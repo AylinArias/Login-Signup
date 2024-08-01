@@ -71,6 +71,7 @@ dependencies {
     implementation ("androidx.compose.material:material-icons-core:1.5.0")
     implementation ("androidx.compose.material:material-icons-extended:1.5.0")
     implementation ("androidx.compose.material3:material3:1.2.0")
+    implementation ("androidx.security:security-crypto:1.1.0-alpha03")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

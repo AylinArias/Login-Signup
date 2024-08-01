@@ -1,4 +1,4 @@
-package com.example.login_signup
+package com.example.login_signup.screens
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -61,14 +61,15 @@ fun SignupScreen(navController: NavController) {
     val passwordVisible = remember { mutableStateOf(false) }
     val isError = remember { mutableStateOf(false) }
     val errorMessage = remember { mutableStateOf("") }
+    val showSnackbar = remember { mutableStateOf(false) }
 
-
-    LaunchedEffect(isError.value) {
-        if (isError.value) {
+    LaunchedEffect(showSnackbar.value) {
+        if (showSnackbar.value) {
             scaffoldState.snackbarHostState.showSnackbar(
-                message = "Datos ingresados incorrectos",
-                duration = SnackbarDuration.Short
+                message = "Se presionó el botón de crear cuenta",
+                duration = SnackbarDuration.Long
             )
+            showSnackbar.value = false
         }
     }
 
@@ -362,6 +363,7 @@ fun SignupScreen(navController: NavController) {
                                 }
                                 else -> {
                                     isError.value = false
+                                    showSnackbar.value = true
                                     navController.navigate("login")
                                 }
                             }

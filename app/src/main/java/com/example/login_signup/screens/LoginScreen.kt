@@ -41,13 +41,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.login_signup.composables.WaveHeader
-import com.example.login_signup.ui.theme.LoginSignupTheme
 import com.example.login_signup.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel

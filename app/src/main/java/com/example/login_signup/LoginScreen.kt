@@ -249,7 +249,7 @@ fun LoginScreen(navController: NavController) {
                         onClick = {
                             validateFields()
                             if (emailError.value.isEmpty() && passwordError.value.isEmpty()) {
-                                navController.navigate("signup")
+                                navController.navigate("home")
                             }
                         },
                         modifier = Modifier

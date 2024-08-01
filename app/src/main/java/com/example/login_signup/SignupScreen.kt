@@ -1,6 +1,7 @@
 package com.example.login_signup
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -280,8 +281,8 @@ fun SignupScreen(navController: NavController) {
                     )
 
                     TextField(
-                        value = passwordState.value,
-                        onValueChange = { passwordState.value = it },
+                        value = confirmPasswordState.value,
+                        onValueChange = { confirmPasswordState.value = it },
                         placeholder = { Text("Reingresar contraseña") },
                         trailingIcon = {
                             IconButton(onClick = {
@@ -334,27 +335,34 @@ fun SignupScreen(navController: NavController) {
 
                     Button(
                         onClick = {
+                            val emailPattern = android.util.Patterns.EMAIL_ADDRESS
+                            val phonePattern = Regex("\\+\\d{1,3} \\d{6,15}")
+
+                            Log.d("SignupScreen", "Email: ${emailState.value}")
+                            Log.d("SignupScreen", "Phone: ${phoneState.value}")
+                            Log.d("SignupScreen", "Password: ${passwordState.value}")
+                            Log.d("SignupScreen", "Confirm Password: ${confirmPasswordState.value}")
+
                             when {
-                                emailState.value.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(
-                                    emailState.value
-                                ).matches() -> {
+                                emailState.value.isEmpty() || !emailPattern.matcher(emailState.value).matches() -> {
                                     isError.value = true
                                     errorMessage.value = "Correo electrónico incorrecto"
                                 }
-
-                                phoneState.value.isEmpty() -> {
+                                phoneState.value.isEmpty() || !phonePattern.matches(phoneState.value) -> {
                                     isError.value = true
                                     errorMessage.value = "Número de teléfono incorrecto"
                                 }
-
-                                passwordState.value.isEmpty() || passwordState.value != confirmPasswordState.value -> {
+                                passwordState.value.isEmpty() -> {
+                                    isError.value = true
+                                    errorMessage.value = "Contraseña vacía"
+                                }
+                                passwordState.value != confirmPasswordState.value -> {
                                     isError.value = true
                                     errorMessage.value = "Las contraseñas no coinciden"
                                 }
-
                                 else -> {
                                     isError.value = false
-                                    navController.navigate("home")
+                                    navController.navigate("login")
                                 }
                             }
                         },

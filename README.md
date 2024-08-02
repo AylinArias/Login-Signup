@@ -31,8 +31,9 @@ Esta descripción se debe utilizar para referencia de desarrollo de las pantalla
 
 ## Videos de Demostración
 
-[Video 1](https://github.com/AylinArias/Login-Signup/blob/master/images/Screen%20Recording%202024-08-01%20at%201.07.06%E2%80%AFp.m..mp4)
-
-
+<video width="100%" controls>
+  <source src="https://github.com/AylinArias/Login-Signup/blob/master/images/Screen%20Recording%202024-08-01%20at%201.07.06%E2%80%AFp.m..mp4" type="video/mp4">
+  Tu navegador no soporta el elemento de video.
+</video>
 
 

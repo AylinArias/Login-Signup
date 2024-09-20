@@ -1,14 +1,29 @@
-# Proyecto UI design Login-Signup
-Este proyecto de una aplicación móvil demostrativa tiene como fin verificar y evaluar las habilidades del desarrollador para el diseño de interfaces gráficas para aplicaciones móviles.
+# Proyecto UI Design: Login-Signup
+
+Este proyecto es una aplicación móvil demostrativa que evalúa las habilidades de diseño de interfaces gráficas para aplicaciones móviles.
 
 ## Descripción del Proyecto
 
-Esta descripción se debe utilizar para referencia de desarrollo de las pantallas de Acceso a la cuenta (Login) y Creación de cuenta (Signup).
+El objetivo es crear pantallas para **Acceso a la cuenta (Login)** y **Creación de cuenta (Signup)**, con un enfoque en diseño moderno y funcional.
+
+## Funcionalidades
+- Pantalla de login con validación.
+- Pantalla de registro de usuarios.
 
 ### Pantalla de Login
 
-![Login](https://github.com/AylinArias/Login-Signup/blob/master/images/LoginScreen.png)
+![Login](images/LoginScreen.png)
 
 ### Pantalla de Signup
 
-![Login](https://github.com/AylinArias/Login-Signup/blob/master/images/SignupScreen.png)
+![Signup](images/SignupScreen.png)
+
+## Instalación
+
+1. Clonar el repositorio.
+2. Abrir en Android Studio.
+3. Ejecutar en un emulador o dispositivo físico.
+
+## Tecnologías Usadas
+- Kotlin
+- Jetpack Compose
